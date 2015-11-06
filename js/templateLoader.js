@@ -22,7 +22,10 @@
                 var _url = _slf.prefix + tmplName + _slf.suffix;
                 var resp = $.ajax({
                     url: _url,
+                    method: "GET",
                     dataType: "text",
+                    cache: false,
+                    contentType: "text/plain"
                 });
                 resp.success(function (result) {
                     _slf.cache[tmplName] = _.template(result);
@@ -39,7 +42,10 @@
             _.extend(_slf, _.pick(options, "complete"));
             var resp = $.ajax({
                 url: _url,
+                method: "GET",
                 dataType: "text",
+                cache: false,
+                contentType: "text/plain"
             });
             resp.success(function (result) {
                 _slf.cache[tmplName] = _.template(result);
