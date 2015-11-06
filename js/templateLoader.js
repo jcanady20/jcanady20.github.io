@@ -3,7 +3,7 @@
 (function () {
     var templateLoader = function () {
         this.cache = {};
-        this.prefix = "/";
+        this.prefix = "/js/templates/";
         this.suffix = ".tmpl";
         this.initialize.apply(this, arguments);
     };
