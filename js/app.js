@@ -199,7 +199,7 @@ $(function () {
         window.app.showError(title, jqXHR.statusText, jqXHR.status, jqXHR);
     });
     window.onerror = function (errorMsg, url, lineNumber, column, errorObj) {
-        window.app.showError("JavaScript Error", errorMsg, "JavaScript Error", null);
+        //window.app.showError("JavaScript Error", errorMsg, "JavaScript Error", null);
         //    Return true to tell the browser you've handled the error yourself
         //    or Return false to let the browser run its error handler as well
         return false;
