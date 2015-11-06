@@ -143,9 +143,10 @@ window.app = (function (window, $, ko, _, Backbone) {
     m_self.showError = (function (title, description, status, xhr) {
         var error = buildError(title, description, status, xhr);
         var mdl = new Models.Error(error);
-        var errView = new Views.Error({ model: mdl });
-        errView.render().$el.appendTo("body");
-        errView.showDialog();
+        _log(mdl.toJSON());
+        //var errView = new Views.Error({ model: mdl });
+        //errView.render().$el.appendTo("body");
+        //errView.showDialog();
     });
 
     var buildError = (function (title, description, status, xhr) {
@@ -199,7 +200,7 @@ $(function () {
         window.app.showError(title, jqXHR.statusText, jqXHR.status, jqXHR);
     });
     window.onerror = function (errorMsg, url, lineNumber, column, errorObj) {
-        //window.app.showError("JavaScript Error", errorMsg, "JavaScript Error", null);
+        window.app.showError("JavaScript Error", errorMsg, "JavaScript Error", null);
         //    Return true to tell the browser you've handled the error yourself
         //    or Return false to let the browser run its error handler as well
         return false;
