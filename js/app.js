@@ -27,6 +27,14 @@ window.app = (function (window, $, ko, _, Backbone) {
 
     //    Models
     Models.Error = Backbone.Model.extend();
+    Models.Profile = Backbone.Model.extend({
+        defaults: {
+            name: "James Canady",
+            company: "IBM",
+            title: "Software Engineer"
+        }
+    });
+    Models.Project = Backbone.Model.extend();
 
     //    Views
     Views.Empty = Backbone.View.extend({
@@ -101,6 +109,39 @@ window.app = (function (window, $, ko, _, Backbone) {
         template: null,
         initialize: function () {
             _log("Initializing " + this.viewName);
+            this.fetchTemplate();
+            this.render();
+        },
+        render: function () {
+            this.$el.empty();
+            if (this.template !== null) {
+                this.$el.append(this.template());
+                $(this.elName).append(this.$el);
+            }
+            return this;
+        },
+        fetchTemplate: function () {
+            var _slf = this;
+            if (_slf.template === null) {
+                var resp = m_tmplManager.load(_slf.templateName);
+                resp.success(function (result) {
+                    _slf.template = m_tmplManager.cache[_slf.templateName];
+                    _slf.render();
+                });
+            }
+        }
+    });
+
+    Views.HeaderView = Backbone.View.extend({
+        viewName: "HeaderView",
+        elName: "#main-header",
+        className: "navbar navbar-default navbar-fixed-top",
+        tagName: "nav",
+        templateName: "header",
+        template: null,
+        initialize: function () {
+            _log("Initializing " + this.viewName);
+            this.fetchTemplate();
             this.render();
         },
         render: function () {
@@ -138,6 +179,7 @@ window.app = (function (window, $, ko, _, Backbone) {
 
     var initialize = (function () {
         _log("Initializing Scheduler Application");
+        new Views.HeaderView();
         m_router = new Router();
         //    Start the Backbone history a necessary step for bookmark-able URL's
         Backbone.history.start();
