@@ -1,0 +1,20 @@
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header bg-danger">
+            <h3 class="modal-title">Error: <small><%= title %></small></h3>
+        </div>
+        <div class="modal-body">
+            <p><span><%= status %>::</span><span><%= statusText %></span></p>
+            <% if(data) {%>
+            <div style="max-height: 200px; overflow: auto; margin-bottom: 6px; margin-top: 6px; padding: 6px; word-wrap: break-word;">
+                <% _.forEach(_.keys(data), function(key) {
+                %><p><strong><%= key %>:</strong> <%= data[key] %></p><%
+                });%>
+            </div>
+            <%}%>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
