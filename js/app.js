@@ -52,6 +52,7 @@ window.app = (function (window, $, ko, _, Backbone) {
         initialize: function () {
             _log("Initializing " + this.viewName);
             this.fetchTemplate();
+            this.render();
         },
         fetchTemplate: function () {
             var _slf = this;
@@ -68,6 +69,8 @@ window.app = (function (window, $, ko, _, Backbone) {
             if (this.model !== null && this.template !== null) {
                 var jm = this.model.toJSON();
                 this.$el.append(this.template(jm));
+                this.$el.appendTo("body");
+                this.showDialog();
             }
             return this;
         },
@@ -143,10 +146,7 @@ window.app = (function (window, $, ko, _, Backbone) {
     m_self.showError = (function (title, description, status, xhr) {
         var error = buildError(title, description, status, xhr);
         var mdl = new Models.Error(error);
-        _log(mdl.toJSON());
-        //var errView = new Views.Error({ model: mdl });
-        //errView.render().$el.appendTo("body");
-        //errView.showDialog();
+        new Views.Error({ model: mdl });
     });
 
     var buildError = (function (title, description, status, xhr) {
