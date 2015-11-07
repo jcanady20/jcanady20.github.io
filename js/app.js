@@ -9,6 +9,7 @@ window.app = (function (window, $, ko, _, Backbone) {
     var m_router = null;
     var m_currentView = null;
     var m_projects = null;
+    var m_header = null;
     var m_tmplManager = new Backbone.TemplateLoader();
 
     var _log = function (obj) {
@@ -129,7 +130,6 @@ window.app = (function (window, $, ko, _, Backbone) {
             this.fetchTemplate();
             this.fetchChildTemplate();
             this.collection.fetch();
-            this.render();
         },
         renderChildren: function () {
             if (this.collection === null || this.collection.length === 0) {
@@ -161,16 +161,15 @@ window.app = (function (window, $, ko, _, Backbone) {
         },
         fetchTemplate: function () {
             var _slf = this;
-            if (_slf.template === null) {
-                var resp = m_tmplManager.load(_slf.templateName);
-                resp.success(function (result) {
-                    _slf.template = m_tmplManager.cache[_slf.templateName];
-                    _slf.render();
-                });
-            }
+
+            var resp = m_tmplManager.load(_slf.templateName);
+            resp.success(function (result) {
+                _slf.template = m_tmplManager.cache[_slf.templateName];
+                _slf.render();
+            });
+
         },
         fetchChildTemplate: function () {
-            _log("---- Fetching Child Template");
             var _slf = this;
             if (_slf.childTemplate === null) {
                 var resp = m_tmplManager.load(_slf.childTemplateName);
@@ -195,23 +194,26 @@ window.app = (function (window, $, ko, _, Backbone) {
         tagName: "nav",
         templateName: "header",
         template: null,
+        koViewModel: null,
         initialize: function () {
             _log("Initializing " + this.viewName);
             this.listenTo(this.collection, "sync", this.renderChildren);
-            this.listenTo(this.collection, "request", this.renderLoading);
             this.fetchTemplate();
-            this.render();
         },
         renderChildren: function () {
+            var _slf = this;
             if (this.collection === null || this.collection.length === 0) {
                 _log("Thier is no collection or the collection is empty.");
                 return;
             }
-            var projects = this.collection.toJSON();
-            _log(projects);
-        },
-        renderLoading: function () {
-            _log("fetching blog entries");
+            var el = this.$("#project-list");
+            var  tmpl = _.template('<li><a href="<%= html_url %>" title="<%= name %>"><%= name %></a></li>');
+            this.collection.forEach(function (item) {
+                var mdl = item.toJSON();
+                _log(mdl);
+                var r = tmpl(mdl);
+                el.append(r);
+            });
         },
         render: function () {
             this.$el.empty();
@@ -223,13 +225,11 @@ window.app = (function (window, $, ko, _, Backbone) {
         },
         fetchTemplate: function () {
             var _slf = this;
-            if (_slf.template === null) {
-                var resp = m_tmplManager.load(_slf.templateName);
-                resp.success(function (result) {
-                    _slf.template = m_tmplManager.cache[_slf.templateName];
-                    _slf.render();
-                });
-            }
+            var resp = m_tmplManager.load(_slf.templateName);
+            resp.success(function (result) {
+                _slf.template = m_tmplManager.cache[_slf.templateName];
+                _slf.render();
+            });
         }
     });
 
@@ -250,7 +250,7 @@ window.app = (function (window, $, ko, _, Backbone) {
         _log("Initializing Scheduler Application");
         m_projects = new Collections.Projects();
         m_projects.fetch();
-        new Views.HeaderView({collection: m_projects});
+        m_header = new Views.HeaderView({collection: m_projects});
         m_router = new Router();
         //    Start the Backbone history a necessary step for bookmark-able URL's
         Backbone.history.start();
@@ -275,6 +275,10 @@ window.app = (function (window, $, ko, _, Backbone) {
         }
         return errorModel;
     });
+
+    m_self.header = function () {
+        return m_header;
+    };
 
     return m_self;
 
