@@ -1,0 +1,9 @@
+<div class="media">
+    <div class="media-left">
+        <img class="media-object" src="<%= image.src %>" alt="<%= image.alt %>" />
+    </div>
+    <div class="media-body">
+        <h4 class="media-heading"><%= title %> <small><%= moment(date).add(moment().utcOffset(), 'minutes').format('MM-DD-YYYY') %></small></div>
+        <%= body %>
+    </div>
+</div>
