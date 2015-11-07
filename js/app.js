@@ -44,7 +44,7 @@ window.app = (function (window, $, ko, _, Backbone) {
     });
     Collections.Blogs = Backbone.Collection.extend({
         model: Models.Blog,
-        url: "/_data/blogEntries.json"
+        url: "/data/blogEntries.json"
     });
 
     //    Views
