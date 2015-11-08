@@ -123,15 +123,11 @@ window.app = (function (window, $, _, Backbone) {
             this.listenTo(this.collection, "sync", this.renderChildren);
             this.listenTo(this.collection, "request", this.renderLoading);
             this.collection.fetch();
+            this.render();
         },
         renderChildren: function () {
             if (this.collection === null || this.collection.length === 0) {
                 _log("Thier is no collection or the collection is empty.");
-                return;
-            }
-            if (this.childTemplate === null) {
-                _log("The blog template is null, fetching the template now.");
-                this.fetchChildTemplate();
                 return;
             }
             this.collection.forEach(function (item) {
@@ -145,10 +141,10 @@ window.app = (function (window, $, _, Backbone) {
         },
         render: function () {
             this.$el.empty();
-            if (this.template !== null) {
-                this.$el.append(this.template());
-                $(this.elName).append(this.$el);
-            }
+
+            this.$el.append(this.template());
+            $(this.elName).append(this.$el);
+
             return this;
         },
         removeChildren: function () {
