@@ -115,8 +115,8 @@ window.app = (function (window, $, _, Backbone) {
         viewName: "MainView",
         elName: "#main-content",
         childContainer: ".blog-entries",
-        childTemplate: _.temple($("#blog-entry-tmpl").html()),
-        template: _.temple($("#blogs-tmpl").html()),
+        childTemplate: _.template($("#blog-entry-tmpl").html()),
+        template: _.template($("#blogs-tmpl").html()),
         initialize: function () {
             _log("Initializing " + this.viewName);
             this.collection = new Collections.Blogs();
