@@ -185,6 +185,7 @@ window.app = (function (window, $, _, Backbone) {
                 var resp = m_tmplManager.load(_slf.childTemplateName);
                 resp.done(function (result) {
                     _slf.childTemplate = m_tmplManager.cache[_slf.childTemplateName];
+                    _slf.renderChildren();
                 });
             }
         },
