@@ -22,6 +22,83 @@
             </div>
         </div>
 
+        <script id="blog-entry-tmpl" type="text/x-jquery-tmpl">
+            <div class="media">
+                <div class="media-left">
+                    <img class="media-object" src="<%= image.src %>" alt="<%= image.alt %>" />
+                </div>
+                <div class="media-body">
+                    <h4 class="media-heading"><%= title %> <small><%= moment(date).add(moment().utcOffset(), 'minutes').format('MM-DD-YYYY') %></small></div>
+                    <%= body %>
+                </div>
+            </div>
+        </script>
+        <script id="blogs-tmpl" type="text/x-jquery-tmpl">
+            <div class="page-header">
+                <h1>Latest Entries</h1>
+            </div>
+            <div class="blog-entries"></div>
+        </script>
+        <script id="error-tmpl" type="text/x-jquery-tmpl">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger">
+                        <h3 class="modal-title">Error: <small><%= title %></small></h3>
+                    </div>
+                    <div class="modal-body">
+                        <p><span><%= status %>::</span><span><%= statusText %></span></p>
+                        <% if(data) {%>
+                        <div style="max-height: 200px; overflow: auto; margin-bottom: 6px; margin-top: 6px; padding: 6px; word-wrap: break-word;">
+                            <% _.forEach(_.keys(data), function(key) {
+                            %><p><strong><%= key %>:</strong> <%= data[key] %></p><%
+                            });%>
+                        </div>
+                        <%}%>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </script>
+        <script id="header-tmpl" type="text/x-jquery-tmpl">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button
+                        type="button"
+                        class="navbar-toggle collapsed"
+                        data-toggle="collapse"
+                        data-target="#bs-navbar-collapse-1"
+                        aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="<%= html_url %>">
+                        <img class="img-responsive" src="<%= avatar_url %>" style="width: 20px; height: 20px; display:inline;" />
+                        <%= name %>
+                    </a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
+                    <ul class="nav navbar-nav header-links">
+                        <li class="menu-news"><a href="#/news">News</a></li>
+                        <li class="menu-repos"><a href="#/repos" title="Repositories">Repositories <span class="badge"><%= public_repos %></span></a></li>
+                    </ul>
+                </div>
+            </div>
+        </script>
+        <script id="repo-entry-tmpl" type="text/x-jquery-tmpl">
+            <div class=""></div>
+        </script>
+        <script id="repositories-tmpl" type="text/x-jquery-tmpl">
+            <div class="page-header">
+                <h1>Public Repositories</h1>
+            </div>
+            <div class="repo-entries"></div>
+        </script>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
         <Script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></Script>

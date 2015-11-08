@@ -8,8 +8,6 @@ window.app = (function (window, $, _, Backbone) {
     var m_router = null;
     var m_currentView = null;
     var m_header = null;
-    var m_templateList = ["error", "header", "blogs", "repositories", "blog-entry", "repo-entry"];
-    var m_tmplManager = null;
 
     var _log = function (obj) {
         if (m_debug === true && window.console !== undefined) {
@@ -78,26 +76,14 @@ window.app = (function (window, $, _, Backbone) {
     Views.Error = Backbone.View.extend({
         viewName: "ErrorView",
         className: "modal fade",
-        templateName: "error",
-        template: null,
+        template: _.template($("#error-tmpl").html()),
         initialize: function () {
             _log("Initializing " + this.viewName);
-            this.fetchTemplate();
             this.render();
-        },
-        fetchTemplate: function () {
-            var _slf = this;
-            if (_slf.template === null) {
-                var resp = m_tmplManager.load(_slf.templateName);
-                resp.done(function (result) {
-                    _slf.template = m_tmplManager.cache[_slf.templateName];
-                    _slf.render();
-                });
-            }
         },
         render: function () {
             this.$el.empty();
-            if (this.model !== null && this.template !== null) {
+            if (this.model !== null) {
                 var jm = this.model.toJSON();
                 this.$el.append(this.template(jm));
                 this.$el.appendTo("body");
@@ -128,18 +114,14 @@ window.app = (function (window, $, _, Backbone) {
     Views.MainView = Backbone.View.extend({
         viewName: "MainView",
         elName: "#main-content",
-        templateName: "blogs",
-        childTemplateName: "blog-entry",
-        childTemplate: null,
         childContainer: ".blog-entries",
-        template: null,
+        childTemplate: _.temple($("#blog-entry-tmpl").html()),
+        template: _.temple($("#blogs-tmpl").html()),
         initialize: function () {
             _log("Initializing " + this.viewName);
             this.collection = new Collections.Blogs();
             this.listenTo(this.collection, "sync", this.renderChildren);
             this.listenTo(this.collection, "request", this.renderLoading);
-            this.fetchTemplate();
-            this.fetchChildTemplate();
             this.collection.fetch();
         },
         renderChildren: function () {
@@ -167,27 +149,7 @@ window.app = (function (window, $, _, Backbone) {
                 this.$el.append(this.template());
                 $(this.elName).append(this.$el);
             }
-
             return this;
-        },
-        fetchTemplate: function () {
-            var _slf = this;
-            var resp = m_tmplManager.load(_slf.templateName);
-            resp.done(function (result) {
-                _slf.template = m_tmplManager.cache[_slf.templateName];
-                _slf.render();
-            });
-
-        },
-        fetchChildTemplate: function () {
-            var _slf = this;
-            if (_slf.childTemplate === null) {
-                var resp = m_tmplManager.load(_slf.childTemplateName);
-                resp.done(function (result) {
-                    _slf.childTemplate = m_tmplManager.cache[_slf.childTemplateName];
-                    _slf.renderChildren();
-                });
-            }
         },
         removeChildren: function () {
             $(this.childContainer).empty();
@@ -201,9 +163,7 @@ window.app = (function (window, $, _, Backbone) {
     Views.RepositoryView = Backbone.View.extend({
         viewName: "RepositoryView",
         elName: "#main-content",
-        templateName: "repositories",
-        template: null,
-        childTemplateName: "repo-details",
+        template: _.template($("#repositories-tmpl").html()),
         childTemplate: null,
         initialize: function () {
             _log("Initializing " + this.viewName);
@@ -226,15 +186,6 @@ window.app = (function (window, $, _, Backbone) {
             }
             return this;
         },
-        fetchTemplate: function () {
-            var _slf = this;
-            var resp = m_tmplManager.load(_slf.templateName);
-            resp.done(function (result) {
-                _slf.template = m_tmplManager.cache[_slf.templateName];
-                _slf.render();
-            });
-
-        },
         removeChildren: function () {
             $(this.childContainer).empty();
         },
@@ -249,48 +200,21 @@ window.app = (function (window, $, _, Backbone) {
         elName: "#main-header",
         className: "navbar navbar-default navbar-fixed-top",
         tagName: "nav",
-        templateName: "header",
-        template: null,
+        template: _.template($("#header-tmpl").html()),
         initialize: function () {
             _log("Initializing " + this.viewName);
             this.model = new Models.Profile();
             this.listenTo(this.model, "sync", this.render);
-            this.fetchTemplate();
             this.model.fetch();
-        },
-        renderChildren: function () {
-            var _slf = this;
-            if (this.collection === null || this.collection.length === 0) {
-                _log("Thier is no collection or the collection is empty.");
-                return;
-            }
-            var el = this.$("#project-list");
-            var  tmpl = _.template('<li><a href="<%= html_url %>" title="<%= name %>"><%= name %></a></li>');
-            this.collection.forEach(function (item) {
-                var mdl = item.toJSON();
-                var r = tmpl(mdl);
-                el.append(r);
-            });
         },
         render: function () {
             this.$el.empty();
-            if (!this.template) {
-                return this;
-            }
             var mdl = this.model.toJSON();
             this.$el.append(this.template(mdl));
             $(this.elName).append(this.$el);
             //    Set the Document Title
             document.title = mdl.name;
             return this;
-        },
-        fetchTemplate: function () {
-            var _slf = this;
-            var resp = m_tmplManager.load(_slf.templateName);
-            resp.done(function () {
-                _slf.template = m_tmplManager.cache[_slf.templateName];
-                _slf.render();
-            });
         },
         setActiveLink: function (className) {
             this.$el.find(className)
@@ -330,13 +254,9 @@ window.app = (function (window, $, _, Backbone) {
 
     var initialize = (function () {
         _log("Initializing Application");
-        m_tmplManager = new Backbone.TemplateLoader();
-        var resp = m_tmplManager.loadList(m_templateList);
-        resp.done(function () {
-            m_header = new Views.HeaderView();
-            m_router = new Router();
-            Backbone.history.start();
-        });
+        m_header = new Views.HeaderView();
+        m_router = new Router();
+        Backbone.history.start();
     }());
 
     m_self.showError = function (title, description, status, xhr) {
