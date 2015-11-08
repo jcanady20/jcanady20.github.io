@@ -43,7 +43,9 @@ window.app = (function (window, $, _, Backbone) {
     //    Collections
     Collections.Repositories = Backbone.Collection.extend({
         model: Models.Project,
-        url: "https://api.github.com/users/jcanady20/repos"
+        url: function () {
+            return "https://api.github.com/users/" + m_userName + "/repos";
+        }
     });
     Collections.Blogs = Backbone.Collection.extend({
         model: Models.Blog,
@@ -51,7 +53,9 @@ window.app = (function (window, $, _, Backbone) {
     });
     Collections.BlogCommits = Backbone.Collection.extend({
         model: Models.BlogCommit,
-        url: "https://api.github.com/repos/jcanady20/jcanady20.github.io/contents/data"
+        url: function () {
+            return "https://api.github.com/repos/" + m_userName + "/" + m_userName + ".github.io/contents/data";
+        }
     });
 
     //    Views
