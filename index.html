@@ -90,7 +90,20 @@
             </div>
         </script>
         <script id="repo-entry-tmpl" type="text/x-jquery-tmpl">
-            <div class=""></div>
+            <div class="media">
+                <div class="media-body">
+                    <h4 class="media-heading"><%= name %> <small><%= moment(updated_at).add(moment().utcOffset(), 'minutes').format('MM-DD-YYYY') %></small></div>
+                    <%= description %>
+                </div>
+                <div class="repo-stats">
+                    <%= language %>
+                    <div class="btn btn-group">
+                        <a class="btn btn-link" href="<%= forks_url %>" title="Forks"><i class="fa fa-fw fa-code-fork"></i> <%= forks %></a>
+                        <a class="btn btn-link" href="<%= html_url + '/issues' %>" title="Issues"><i class="fa fa-fw fa-bug"></i> <%= open_issues %></a>
+                        <a class="btn btn-link" href="<%= html_url + '/stargazers' %>" title="Star Gazers"><i class="fa fa-fw fa-star"></i> <%= stargazers_count %></a>
+                    </div>
+                </div>
+            </div>
         </script>
         <script id="repositories-tmpl" type="text/x-jquery-tmpl">
             <div class="page-header">

@@ -42,7 +42,7 @@ window.app = (function (window, $, _, Backbone) {
 
     //    Collections
     Collections.Repositories = Backbone.Collection.extend({
-        model: Models.Project,
+        model: Models.Repo,
         url: function () {
             return "https://api.github.com/users/" + m_userName + "/repos";
         }
@@ -163,27 +163,30 @@ window.app = (function (window, $, _, Backbone) {
     Views.RepositoryView = Backbone.View.extend({
         viewName: "RepositoryView",
         elName: "#main-content",
+        childContainer: ".repo-entries",
         template: _.template($("#repositories-tmpl").html()),
-        childTemplate: null,
+        childTemplate: _.template($("#repo-entry-tmpl").html()),
         initialize: function () {
             _log("Initializing " + this.viewName);
             this.collection = new Collections.Repositories();
             this.listenTo(this.collection, "sync", this.renderChildren);
+            this.render();
             this.collection.fetch();
         },
         renderLoading: function () { },
         renderChildren: function () {
+            this.removeChildren();
             this.collection.forEach(function (item) {
                 var mdl = item.toJSON();
                 _log(mdl);
-            });
+                var r = this.childTemplate(mdl);
+                $(this.childContainer).append(r);
+            }, this);
         },
         render: function () {
             this.$el.empty();
-            if (this.template !== null) {
-                this.$el.append(this.template());
-                $(this.elName).append(this.$el);
-            }
+            this.$el.append(this.template());
+            $(this.elName).append(this.$el);
             return this;
         },
         removeChildren: function () {
