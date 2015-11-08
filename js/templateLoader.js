@@ -3,20 +3,20 @@
 (function () {
     var templateLoader = function () {
         this.cache = {};
-        this.prefix = "/js/templates/";
+        this.prefix = "/tmpls/";
         this.suffix = ".tmpl";
         this.initialize.apply(this, arguments);
     };
 
     _.extend(templateLoader.prototype, {}, {
-        initialize: function() {
-        },
+        initialize: function() { },
         config: function (options) {
             this.prefix = _.pick(options, 'prefix');
             this.suffix = _.pick(options, 'suffix');
         },
-        loadList: function (templateList, options) {
+        loadList: function (templateList) {
             var _slf = this;
+            var  dfd = $.Deferred();
             var unloadedTemplates = templateList;
             _.forEach(templateList, function (tmplName) {
                 var _url = _slf.prefix + tmplName + _slf.suffix;
@@ -27,19 +27,20 @@
                     cache: false,
                     contentType: "text/plain"
                 });
-                resp.success(function (result) {
+                resp.done(function (result) {
                     _slf.cache[tmplName] = _.template(result);
                     unloadedTemplates = _.without(unloadedTemplates, tmplName);
-                    if (unloadedTemplates.length === 0 && _slf.complete) {
-                        _slf.complete.call(_slf);
+                    if (unloadedTemplates.length === 0) {
+                        dfd.resolve();
                     }
                 });
             });
+            return dfd.promise();
         },
-        load: function (tmplName, options) {
+        load: function (tmplName) {
             var _slf = this;
+            var dfd = $.Deferred();
             var _url = _slf.prefix + tmplName + _slf.suffix;
-            _.extend(_slf, _.pick(options, "complete"));
             var resp = $.ajax({
                 url: _url,
                 method: "GET",
@@ -47,13 +48,11 @@
                 cache: false,
                 contentType: "text/plain"
             });
-            resp.success(function (result) {
+            resp.done(function (result) {
                 _slf.cache[tmplName] = _.template(result);
-                if (_slf.complete) {
-                    _slf.complete.call(_slf);
-                }
+                dfd.resolve();
             });
-            return resp;
+            return dfd.promise();
         },
         get: function(templateName) {
             return this.cache[templateName];

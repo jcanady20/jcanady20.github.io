@@ -1,16 +1,15 @@
 /*jshint bitwise: false, strict: false, browser: true, jquery: true, -W069*/
-/*global $, jQuery, alert, ko, console, moment, Backbone, _*/
-//    Returns the A/P Meridian indication for the Time
-//    AM/PM
-window.app = (function (window, $, ko, _, Backbone) {
+/*global $, jQuery, alert, console, moment, Backbone, _*/
+window.app = (function (window, $, _, Backbone) {
     "use strict";
     var m_self = {};
+    var m_userName = "jcanady20";
     var m_debug = true;
     var m_router = null;
     var m_currentView = null;
-    var m_projects = null;
     var m_header = null;
-    var m_tmplManager = new Backbone.TemplateLoader();
+    var m_templateList = ["error", "header", "blogs", "repositories", "blog-entry", "repo-entry"];
+    var m_tmplManager = null;
 
     var _log = function (obj) {
         if (m_debug === true && window.console !== undefined) {
@@ -30,22 +29,31 @@ window.app = (function (window, $, ko, _, Backbone) {
     Models.Error = Backbone.Model.extend();
     Models.Profile = Backbone.Model.extend({
         defaults: {
-            name: "James Canady",
-            company: "IBM",
-            title: "Software Engineer"
-        }
+            name: "",
+            avatar_url: "",
+            html_url: "",
+            public_repos: 0,
+            email: "",
+            company: "",
+        },
+        url: "https://api.github.com/users/" + m_userName
     });
-    Models.Project = Backbone.Model.extend();
+    Models.Repo = Backbone.Model.extend();
     Models.Blog = Backbone.Model.extend();
+    Models.BlogCommit = Backbone.Model.extend();
 
     //    Collections
-    Collections.Projects = Backbone.Collection.extend({
+    Collections.Repositories = Backbone.Collection.extend({
         model: Models.Project,
         url: "https://api.github.com/users/jcanady20/repos"
     });
     Collections.Blogs = Backbone.Collection.extend({
         model: Models.Blog,
         url: "/data/blogEntries.json"
+    });
+    Collections.BlogCommits = Backbone.Collection.extend({
+        model: Models.BlogCommit,
+        url: "https://api.github.com/repos/jcanady20/jcanady20.github.io/contents/data"
     });
 
     //    Views
@@ -60,6 +68,9 @@ window.app = (function (window, $, ko, _, Backbone) {
         render: function () {
             this.$el.empty().append(this.template(this.model.toJSON()));
             return this;
+        },
+        remove: function () {
+            Backbone.View.prototype.remove.call(this);
         },
         events: {}
     });
@@ -78,7 +89,7 @@ window.app = (function (window, $, ko, _, Backbone) {
             var _slf = this;
             if (_slf.template === null) {
                 var resp = m_tmplManager.load(_slf.templateName);
-                resp.success(function (result) {
+                resp.done(function (result) {
                     _slf.template = m_tmplManager.cache[_slf.templateName];
                     _slf.render();
                 });
@@ -117,7 +128,7 @@ window.app = (function (window, $, ko, _, Backbone) {
     Views.MainView = Backbone.View.extend({
         viewName: "MainView",
         elName: "#main-content",
-        templateName: "main",
+        templateName: "blogs",
         childTemplateName: "blog-entry",
         childTemplate: null,
         childContainer: ".blog-entries",
@@ -161,9 +172,8 @@ window.app = (function (window, $, ko, _, Backbone) {
         },
         fetchTemplate: function () {
             var _slf = this;
-
             var resp = m_tmplManager.load(_slf.templateName);
-            resp.success(function (result) {
+            resp.done(function (result) {
                 _slf.template = m_tmplManager.cache[_slf.templateName];
                 _slf.render();
             });
@@ -178,7 +188,53 @@ window.app = (function (window, $, ko, _, Backbone) {
                 });
             }
         },
-        remvoeChildren: function () {
+        removeChildren: function () {
+            $(this.childContainer).empty();
+        },
+        remove: function () {
+            this.removeChildren();
+            Backbone.View.prototype.remove.call(this);
+        }
+    });
+
+    Views.RepositoryView = Backbone.View.extend({
+        viewName: "RepositoryView",
+        elName: "#main-content",
+        templateName: "repositories",
+        template: null,
+        childTemplateName: "repo-details",
+        childTemplate: null,
+        initialize: function () {
+            _log("Initializing " + this.viewName);
+            this.collection = new Collections.Repositories();
+            this.listenTo(this.collection, "sync", this.renderChildren);
+            this.collection.fetch();
+        },
+        renderLoading: function () { },
+        renderChildren: function () {
+            this.collection.forEach(function (item) {
+                var mdl = item.toJSON();
+                _log(mdl);
+            });
+        },
+        render: function () {
+            this.$el.empty();
+            if (this.template !== null) {
+                this.$el.append(this.template());
+                $(this.elName).append(this.$el);
+            }
+            return this;
+        },
+        fetchTemplate: function () {
+            var _slf = this;
+            var resp = m_tmplManager.load(_slf.templateName);
+            resp.done(function (result) {
+                _slf.template = m_tmplManager.cache[_slf.templateName];
+                _slf.render();
+            });
+
+        },
+        removeChildren: function () {
             $(this.childContainer).empty();
         },
         remove: function () {
@@ -194,11 +250,12 @@ window.app = (function (window, $, ko, _, Backbone) {
         tagName: "nav",
         templateName: "header",
         template: null,
-        koViewModel: null,
         initialize: function () {
             _log("Initializing " + this.viewName);
-            this.listenTo(this.collection, "sync", this.renderChildren);
+            this.model = new Models.Profile();
+            this.listenTo(this.model, "sync", this.render);
             this.fetchTemplate();
+            this.model.fetch();
         },
         renderChildren: function () {
             var _slf = this;
@@ -210,50 +267,72 @@ window.app = (function (window, $, ko, _, Backbone) {
             var  tmpl = _.template('<li><a href="<%= html_url %>" title="<%= name %>"><%= name %></a></li>');
             this.collection.forEach(function (item) {
                 var mdl = item.toJSON();
-                _log(mdl);
                 var r = tmpl(mdl);
                 el.append(r);
             });
         },
         render: function () {
             this.$el.empty();
-            if (this.template !== null) {
-                this.$el.append(this.template());
-                $(this.elName).append(this.$el);
-            }
+            var mdl = this.model.toJSON();
+            this.$el.append(this.template(mdl));
+            $(this.elName).append(this.$el);
+            //    Set the Document Title
+            document.title = mdl.name;
             return this;
         },
         fetchTemplate: function () {
             var _slf = this;
             var resp = m_tmplManager.load(_slf.templateName);
-            resp.success(function (result) {
+            resp.done(function () {
                 _slf.template = m_tmplManager.cache[_slf.templateName];
                 _slf.render();
             });
+        },
+        setActiveLink: function (className) {
+            this.$el.find(className)
+            .addClass('active')
+            .siblings()
+            .removeClass('active');
         }
     });
 
     var Router = Backbone.Router.extend({
         routes: {
-            "": "defaultRoute"
+            "": "defaultRoute",
+            "news(/)": "defaultRoute",
+            "repos(/)":"reposRoute"
         },
         defaultRoute: function () {
             _log("Default Route");
+            this.setCurrentView(new Views.MainView(), '.menu-news');
+        },
+        reposRoute: function () {
+            _log("Project Route");
+            this.setCurrentView(new Views.RepositoryView(), '.menu-repos');
+        },
+        removeCurrentView: function () {
             if (m_currentView !== null) {
                 m_currentView.remove();
             }
-            m_currentView = new Views.MainView();
+        },
+        setCurrentView: function (view, linkName) {
+            this.removeCurrentView();
+            if (linkName) {
+                m_header.setActiveLink(linkName);
+            }
+            m_currentView = view;
         }
     });
 
     var initialize = (function () {
-        _log("Initializing Scheduler Application");
-        m_projects = new Collections.Projects();
-        m_projects.fetch();
-        m_header = new Views.HeaderView({collection: m_projects});
-        m_router = new Router();
-        //    Start the Backbone history a necessary step for bookmark-able URL's
-        Backbone.history.start();
+        _log("Initializing Application");
+        m_tmplManager = new Backbone.TemplateLoader();
+        var resp = m_tmplManager.loadList(m_templateList);
+        resp.done(function () {
+            m_header = new Views.HeaderView();
+            m_router = new Router();
+            Backbone.history.start();
+        });
     }());
 
     m_self.showError = function (title, description, status, xhr) {
@@ -282,11 +361,9 @@ window.app = (function (window, $, ko, _, Backbone) {
 
     return m_self;
 
-}(window, $, ko, _, Backbone));
+}(window, $, _, Backbone));
 
 $(function () {
-    //    Disable caching for ajax requests
-    $.ajaxSetup({ cache: false });
     $(document).delegate('a[href$="#"]', "click", function (e) {
         e.preventDefault();
     });

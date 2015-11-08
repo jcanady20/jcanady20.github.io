@@ -1,0 +1,26 @@
+<div class="container-fluid">
+    <div class="navbar-header">
+        <button
+            type="button"
+            class="navbar-toggle collapsed"
+            data-toggle="collapse"
+            data-target="#bs-navbar-collapse-1"
+            aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="<%= html_url %>">
+            <img class="img-responsive" src="<%= avatar_url %>" style="width: 20px; height: 20px; display:inline;" />
+            <%= name %>
+        </a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
+        <ul class="nav navbar-nav header-links">
+            <li class="menu-news"><a href="#/news">News</a></li>
+            <li class="menu-repos"><a href="#/repos" title="Repositories">Repositories <span class="badge"><%= public_repos %></span></a></li>
+        </ul>
+    </div>
+</div>
