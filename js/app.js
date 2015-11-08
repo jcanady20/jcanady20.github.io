@@ -274,6 +274,9 @@ window.app = (function (window, $, _, Backbone) {
         },
         render: function () {
             this.$el.empty();
+            if (!this.template) {
+                return this;
+            }
             var mdl = this.model.toJSON();
             this.$el.append(this.template(mdl));
             $(this.elName).append(this.$el);
